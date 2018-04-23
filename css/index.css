@@ -14,7 +14,6 @@
 }
 
 .react-hint__caret {
-	content: '';
 	width: 0;
 	height: 0;
 	margin: auto;
