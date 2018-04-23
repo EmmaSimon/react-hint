@@ -90,7 +90,7 @@ export default ({Component, createElement}) =>
 				height: targetHeight
 			} = target.getBoundingClientRect()
 
-			let top, left
+			let top, left, caretLeft
 			switch (at) {
 				case 'left':
 					top = targetHeight - hintHeight >> 1
@@ -113,16 +113,19 @@ export default ({Component, createElement}) =>
 					left = targetWidth - hintWidth >> 1
 			}
 
-			return {
-				content, at,
-				top: (top + targetTop - containerTop)|0,
-				left: (left + targetLeft - containerLeft)|0
+			top = (top + targetTop - containerTop)|0
+			left = (left + targetLeft - containerLeft)|0
+			if (left < 0 && (at === 'top' || at === 'bottom')) {
+				caretLeft = left * 2
+				left = 0
 			}
+
+			return {content, at, top, left, caretLeft}
 		}
 
 		render() {
 			const {className, onRenderContent} = this.props
-			const {target, content, at, top, left} = this.state
+			const {target, content, at, top, left, caretLeft} = this.state
 
 			return <div ref={(ref) => this._container = ref}
 				style={this._containerStyle}>
@@ -132,8 +135,12 @@ export default ({Component, createElement}) =>
 							style={{top, left}}>
 								{onRenderContent
 									? onRenderContent(target, content)
-									: <div className={`${className}__content`}>
-										{content}
+									: <div>
+										<div className={`${className}__content`}>
+											{content}
+										</div>
+										<div className={`${className}__caret`}
+											style={{left: caretLeft}}/>
 									</div>
 								}
 						</div>

@@ -176,7 +176,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 				    targetHeight = _target$getBoundingCl.height;
 
 				var top = void 0,
-				    left = void 0;
+				    left = void 0,
+				    caretLeft = void 0;
 				switch (at) {
 					case 'left':
 						top = targetHeight - hintHeight >> 1;
@@ -199,11 +200,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 						left = targetWidth - hintWidth >> 1;
 				}
 
-				return {
-					content: content, at: at,
-					top: top + targetTop - containerTop | 0,
-					left: left + targetLeft - containerLeft | 0
-				};
+				top = top + targetTop - containerTop | 0;
+				left = left + targetLeft - containerLeft | 0;
+				if (left < 0 && (at === 'top' || at === 'bottom')) {
+					caretLeft = left * 2;
+					left = 0;
+				}
+
+				return { content: content, at: at, top: top, left: left, caretLeft: caretLeft };
 			}, _temp), _possibleConstructorReturn(_this, _ret);
 		}
 
@@ -235,7 +239,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 			    content = _state.content,
 			    at = _state.at,
 			    top = _state.top,
-			    left = _state.left;
+			    left = _state.left,
+			    caretLeft = _state.caretLeft;
 
 
 			return createElement(
@@ -253,8 +258,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 						style: { top: top, left: left } },
 					onRenderContent ? onRenderContent(target, content) : createElement(
 						'div',
-						{ className: className + '__content' },
-						content
+						null,
+						createElement(
+							'div',
+							{ className: className + '__content' },
+							content
+						),
+						createElement('div', { className: className + '__caret',
+							style: { left: caretLeft } })
 					)
 				)
 			);
